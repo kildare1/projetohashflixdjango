@@ -1,0 +1,214 @@
+- Homepage
+- Fazr Login e Criar Conta (Usuario e Autenticação)
+    - Email
+    - Username
+    - Senha
+    - Filmes ja vistos
+    - Editar Perfil
+
+
+ - Filmes/Series
+    - Thumb
+    - Titulo
+    - Descrição
+    - Categoria
+    - Quantidade de views
+    - Data de criação
+    - Episodios
+        - Videos
+        - Titulos
+
+- Barra de Pesquisa
+
+#comando na tela do terminal para chamar o site
+
+python manage.py runserver
+
+# para atualizar o banco de dados
+python manage.py makemigrations
+python manage.py migrate
+
+# Criar o super usuario
+python manage.py createsuperuser
+
+#Para criar o aplicativo "filme"
+django-admin startapp filme
+
+
+hatml
+
+# Tailwind e bootstrap - ferramentas que auxiliam na construção de sites em HTML
+
+
+
+Classe no tailwind
+
+#Sites para icones no html
+https://ionic.io/ionicons/usage
+ou
+font awesome
+
+#exemplo de link fixo (statico)
+<a href="https:/>/hstagtreinamentos.com">Link Personalizado</a>
+
+
+                    RECAPITULANDO
+
+MODELS.PY
+ - onde se cria as tabelas do banco de dados.
+ - Sempre que criar o banco de dados ou tabelas no banco de dados, tem que rodaar no terminal os comandos (aula 8)
+    python manage.py makemigrations
+    python manage.py migrate
+
+ - Link do Django
+    djangoproject.com
+    django-admin and manage.py
+
+    CONECTANDO O APP (filme) COM O PROJETO PRINCIPAL (hshflix)
+
+    SETINGS.py
+     no INSTALLED_APP incluir o nome do app, fazendo a conexão do projeto com o app
+        - BASE_DIR -> Caminho do diretorio base
+    no STATIC_url adiciona-se
+
+
+    URLS.py
+        - Onde voce pode gerenciar todos os links do seu site
+        - Definir o link do aplicativo (filme) que voce quer exibir
+
+        - O melhor é criar um arquivo urls.py em cada app (filme)
+        -Ver os arquivos URLS deste projeto
+
+    ADMIN.py
+        - Registra o app (filme) para acessar a tabela e incluir/alerar/excluir registros
+
+    MEDIA -> Diretorio onde ficam armazenadas as imagens do app filme
+
+    URLS/APP.py -> Link onde a pagina vai aparecer
+    VIEWS/APP.py -> o que vai acontecer quando for clicado em um link.
+    TEMPLATE/APP.py -> onde estão aramazenados os arquivos em html.
+
+
+    Quando entro no site eu estou indo no urls do filme pegando o link da homepage,
+    estar buscando a view homapage e esta mostrando a pagina homapage do template
+
+
+                    DETALHE INICIAL DO DETALHESFILME.HTML
+
+
+<div class="py-10">
+    <h1>Essa é o detalhe do filme: {{ object.titulo }}</h1>
+    <p>{{ object }}</p>
+    <p>{{ object.descricao }}</p>
+    <p>visualizacoes: {{ object.visualizacoes }}</p>
+    <img src="{{ object.thumb.url }}">
+
+    <h2>Episodios</h2>
+    {% for episodio in object.episodios.all %}
+        <a href="{{ episodio.video }}">
+           <p>Episodio {{ forloop.counter }}: {{ episodio.titulos }}</p>
+        </a>
+    {% endfor %}
+</div>
+<div class="py-10">
+    <h2>Filmes Relacionados</h2>
+    {% for filme in filmes_relacionados %}
+    <p>
+        <a href="{% url 'filme:detalhesfilme' filme.pk %}">
+            {{ filme.titulo }}
+        </a>
+    </p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+                        DETALHE INICIAL DO homefilmes.HTML
+
+<div class="py-10">
+    <h1>Essa é a nossa HomeFilmes</h1>
+    {% for filme in object_list %}
+        <hr>
+        <a href="{% url 'filme:detalhesfilme' filme.pk %}"><p>{{ filme.titulos }}</p></a>
+        <p>{{ filme.descricao }}</p>
+        <img src="{{ filme.thumb.url }}">
+    {% endfor %}
+</div>
+
+<div class="py-10">
+    <h2>Novo</h2>
+    {{ lista_filmes_recentes }}
+</div>
+
+<div class="py-10">
+    <h2>Em Alta</h2>
+    {{ lista_filmes_emalta }}
+</div>
+
+{% endblock %}
+
+
+Formulario Crispy utilizado no login.html precisa fazer instalações:
+pip install django-crispy-forms
+pip install crispy-bootstrap5
+Precisa configura no campo INSTALLED_APPS do settings.py esse aplicativo baixado.
+'crispy_forms',
+'crispy_bootstrap5'
+
+No final do arquivo setting.py criar duas CONSTANTES
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK ='bootstrap5'
+
+Observação:
+Sempre que construir um formulario no html utilizando o metodo "post", precisa usar o token csrf ->
+csrf token após a tag <form method="post">
+
+
+                                    DEPLOY
+
+
+Sites:
+Railway
+GitHub
+
+no terminal
+pip install gunicorn  -> para permitir gerencia as requisições/ conexões com o nosso site
+pip install whitenoise -> biblioteca do python que vai permitir gerenciar nossos arquivos staticos
+
+pip freeze -> mostra todas as bibliotecas utilizadas no projeto e vamos salvar esses nomes em um arquivo txt
+com o comando abaixo:
+pip freeze > requirements.txt
+
+obs.: sempre que instalar uma nova biblioteca, temos que rodar o comando acima "pip freeze > requirements.txt".
+
+Criar um arquivo runtime.txt para informar a versão do python que estamos utilizando
+
+Criar um arquivo "procfile.txt"
+inserir nele:
+web: python.manage.py migrate && gunicorn hshflix.wsgi --log-file -
+
+No setting inserir na constante "MIDDLEWARE" apos o item securit o comando "'whitenoise.middleware.WhiteNoiseMiddleware',"
+adquirido no site -> https://whitenoise.readthedocs.io/en/latest/
+
+Criar uma constatne STATIC_ROOT = BASE_dIR / "staticfiles"
+
+Banco de dados
+
+no terminal: instalar a biblioteca (psycopg2) que permite  se conectar com o banco de dados da web
+
+pip install dj-database-url
+pip install psycopg2
+
+Abaixo da constante DATABASE inserir os comandos abaixo:
+
+import dj_database_url
+import os
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=1800)
+
+    }
+
+No terminal - inicializar o git
+git init
